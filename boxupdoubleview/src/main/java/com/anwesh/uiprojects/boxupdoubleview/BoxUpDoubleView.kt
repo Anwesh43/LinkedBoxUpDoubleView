@@ -10,7 +10,6 @@ import android.app.Activity
 import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Paint
-import android.graphics.RectF
 import android.graphics.Color
 
 val nodes : Int = 5
@@ -22,7 +21,8 @@ val strokeFactor : Int = 90
 val sizeFactor : Float = 2.9f
 val foreColor : Int = Color.parseColor("#4A148C")
 val backColor : Int = Color.parseColor("#BDBDBD")
-val hFactor : Float = 4f
+val hFactor : Float = 3f
+val delay : Long = 20
 
 fun Int.inverse() : Float = 1f / this
 fun Float.scaleFactor() : Float = Math.floor(this / scDiv).toFloat()
@@ -36,18 +36,22 @@ fun Float.divideScale(i : Int, n : Int) : Float = Math.min(n.inverse(), maxValue
 
 fun Canvas.drawBoxUp(i : Int, sc1 : Float, sc2 : Float, size : Float, paint : Paint) {
     val sf : Float = 1f - 2 * i
+    val sc2i : Float = sc2.divideScale(i, parts)
     val h : Float = size / hFactor
     val y : Float = (size - h) * sc1.divideScale(i, lines) * sf
     drawLine(0f, 0f, 0f, y, paint)
     for (j in 0..(lines - 1)) {
+        val sc2ij : Float = sc2i.divideScale(j, lines)
+        val x : Float = size * (1f - 2 * j) * sc2ij
         save()
-        translate(size * (1f - 2 * j) * sc2.divideScale(i, lines), 0f)
+        translate(x, 0f)
         drawLine(0f, 0f, 0f, y, paint)
         restore()
+        drawLine(0f, 0f, x, 0f, paint)
     }
     save()
     translate(0f, y - h * i)
-    drawRect(-size / 2, 0f, size / 2, h, paint)
+    drawRect(-size , 0f, size, h, paint)
     restore()
 }
 
@@ -90,7 +94,7 @@ class BoxUpDoubleView(ctx : Context) : View(ctx) {
     data class State(var scale : Float = 0f, var dir : Float = 0f, var prevScale : Float = 0f) {
 
         fun update(cb : (Float) -> Unit) {
-            scale += scale.updateValue(dir, lines, 1)
+            scale += scale.updateValue(dir, parts, parts * lines)
             if (Math.abs(scale - prevScale) > 1) {
                 scale = prevScale + dir
                 dir = 0f
@@ -113,7 +117,7 @@ class BoxUpDoubleView(ctx : Context) : View(ctx) {
             if (animated) {
                 cb()
                 try {
-                    Thread.sleep(50)
+                    Thread.sleep(delay)
                     view.invalidate()
                 } catch(ex : Exception) {
 
