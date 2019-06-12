@@ -223,4 +223,13 @@ class BoxUpDoubleView(ctx : Context) : View(ctx) {
             }
         }
     }
+
+    companion object {
+
+        fun create(activity : Activity) : BoxUpDoubleView {
+            var view : BoxUpDoubleView = BoxUpDoubleView(activity)
+            activity.setContentView(view)
+            return view
+        }
+    }
 }
