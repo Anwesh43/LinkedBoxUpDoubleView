@@ -201,4 +201,26 @@ class BoxUpDoubleView(ctx : Context) : View(ctx) {
             curr.startUpdating(cb)
         }
     }
+
+    data class Renderer(var view : BoxUpDoubleView) {
+
+        private val animator : Animator = Animator(view)
+        private val bud : BoxUpDouble = BoxUpDouble(0)
+
+        fun draw(canvas : Canvas, paint : Paint) {
+            canvas.drawColor(backColor)
+            bud.draw(canvas, paint)
+            animator.animate {
+                bud.update {i, scl ->
+                    animator.stop()
+                }
+            }
+        }
+
+        fun handleTap() {
+            bud.startUpdating {
+                animator.start()
+            }
+        }
+    }
 }
